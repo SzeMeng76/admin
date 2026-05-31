@@ -7971,12 +7971,6 @@ const messages = {
           gcash: 'GCash',
           balance: 'Balance',
         },
-          usdt: 'USDT',
-          usdtTrc20: 'USDT (TRC20)',
-          usdcTrc20: 'USDC (TRC20)',
-          trx: 'TRX',
-          balance: 'Balance',
-        },
         paymentTypes: {
           order: 'Order Purchase',
           wallet: 'Wallet Recharge',
