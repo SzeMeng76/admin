@@ -168,10 +168,27 @@ const okpayConfig = reactive({
   display_name: '',
 })
 
+const globepayConfig = reactive({
+  partner_code: '',
+  credential_code: '',
+  notify_url: '',
+  return_url: '',
+  api_base_url: 'https://pay.globepay.co',
+})
+
 const epayChannelOptions = [
   { value: 'wechat', label: 'admin.paymentChannels.channelTypes.wechat' },
   { value: 'alipay', label: 'admin.paymentChannels.channelTypes.alipay' },
   { value: 'qqpay', label: 'admin.paymentChannels.channelTypes.qqpay' },
+]
+
+const globepayChannelOptions = [
+  { value: 'wechat', label: 'admin.paymentChannels.channelTypes.wechat' },
+  { value: 'alipay', label: 'admin.paymentChannels.channelTypes.alipay' },
+  { value: 'alipayhk', label: 'admin.paymentChannels.channelTypes.alipayhk' },
+  { value: 'tng', label: 'admin.paymentChannels.channelTypes.tng' },
+  { value: 'dana', label: 'admin.paymentChannels.channelTypes.dana' },
+  { value: 'gcash', label: 'admin.paymentChannels.channelTypes.gcash' },
 ]
 
 const officialChannelOptions = [
@@ -230,6 +247,9 @@ const formChannelOptions = computed(() => {
   }
   if (form.provider_type === 'okpay') {
     return okpayChannelOptions
+  }
+  if (form.provider_type === 'globepay') {
+    return globepayChannelOptions
   }
   return channelOptions
 })
@@ -404,6 +424,14 @@ const resetOkpayConfig = () => {
   okpayConfig.display_name = ''
 }
 
+const resetGlobepayConfig = () => {
+  globepayConfig.partner_code = ''
+  globepayConfig.credential_code = ''
+  globepayConfig.notify_url = ''
+  globepayConfig.return_url = ''
+  globepayConfig.api_base_url = 'https://pay.globepay.co'
+}
+
 const resetAllConfigs = () => {
   resetEpayConfig()
   resetPaypalConfig()
@@ -414,6 +442,7 @@ const resetAllConfigs = () => {
   resetEpusdtConfig()
   resetTokenpayConfig()
   resetOkpayConfig()
+  resetGlobepayConfig()
 }
 
 // --- Apply functions ---
@@ -526,6 +555,14 @@ const applyOkpayConfig = (raw: Record<string, unknown>) => {
   okpayConfig.return_url = String(raw.return_url || '')
   okpayConfig.callback_url = String(raw.callback_url || '')
   okpayConfig.display_name = String(raw.display_name || '')
+}
+
+const applyGlobepayConfig = (raw: Record<string, unknown>) => {
+  globepayConfig.partner_code = String(raw.partner_code || '')
+  globepayConfig.credential_code = String(raw.credential_code || '')
+  globepayConfig.notify_url = String(raw.notify_url || '')
+  globepayConfig.return_url = String(raw.return_url || '')
+  globepayConfig.api_base_url = String(raw.api_base_url || 'https://pay.globepay.co')
 }
 
 // --- Build functions ---
@@ -726,6 +763,22 @@ const buildOkpayConfig = () => {
   return config
 }
 
+const buildGlobepayConfig = () => {
+  const config: Record<string, unknown> = {}
+  const setIfNotEmpty = (key: string, value: string) => {
+    const trimmed = String(value || '').trim()
+    if (trimmed !== '') {
+      config[key] = trimmed
+    }
+  }
+  setIfNotEmpty('partner_code', globepayConfig.partner_code)
+  setIfNotEmpty('credential_code', globepayConfig.credential_code)
+  setIfNotEmpty('notify_url', globepayConfig.notify_url)
+  setIfNotEmpty('return_url', globepayConfig.return_url)
+  setIfNotEmpty('api_base_url', globepayConfig.api_base_url)
+  return config
+}
+
 // --- Watchers for provider_type / channel_type ---
 
 watch(
@@ -758,6 +811,11 @@ watch(
       const allowed = okpayChannelOptions.map((option) => option.value)
       if (!allowed.includes(form.channel_type)) {
         form.channel_type = allowed[0] || 'usdt'
+      }
+    } else if (value === 'globepay') {
+      const allowed = globepayChannelOptions.map((option) => option.value)
+      if (!allowed.includes(form.channel_type)) {
+        form.channel_type = allowed[0] || 'wechat'
       }
     } else if (value === 'tokenpay') {
       form.channel_type = 'usdt'
@@ -859,6 +917,7 @@ watch(
           applyEpusdtConfig(channel.config_json)
           applyTokenpayConfig(channel.config_json)
           applyOkpayConfig(channel.config_json)
+          applyGlobepayConfig(channel.config_json)
         } else {
           resetAllConfigs()
         }
@@ -950,6 +1009,11 @@ const handleSubmit = async () => {
       ...configJson,
       ...buildOkpayConfig(),
     }
+  } else if (form.provider_type === 'globepay') {
+    configJson = {
+      ...configJson,
+      ...buildGlobepayConfig(),
+    }
   }
 
   const payload = {
@@ -1019,6 +1083,7 @@ const closeModal = () => {
                 <SelectItem value="epusdt">{{ t('admin.paymentChannels.providerTypes.epusdt') }}</SelectItem>
                 <SelectItem value="okpay">{{ t('admin.paymentChannels.providerTypes.okpay') }}</SelectItem>
                 <SelectItem value="tokenpay">{{ t('admin.paymentChannels.providerTypes.tokenpay') }}</SelectItem>
+                <SelectItem value="globepay">{{ t('admin.paymentChannels.providerTypes.globepay') }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1489,6 +1554,28 @@ const closeModal = () => {
             </div>
           </div>
           <div class="mt-3 text-xs text-muted-foreground">{{ t('admin.paymentChannels.modal.okpayHint') }}</div>
+        </div>
+
+        <div v-if="form.provider_type === 'globepay'" class="min-w-0 rounded-xl border border-border bg-muted/20 p-4 overflow-hidden">
+          <div class="text-sm font-semibold text-foreground mb-3">Globepay 配置</div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 [&>*]:min-w-0">
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">Partner Code</label>
+              <Input v-model="globepayConfig.partner_code" placeholder="商户号" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">Credential Code</label>
+              <Input v-model="globepayConfig.credential_code" type="password" placeholder="商户密钥" />
+            </div>
+            <div class="min-w-0 md:col-span-2">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">Notify URL</label>
+              <Input v-model="globepayConfig.notify_url" placeholder="https://your-domain.com/api/public/payment/callback/globepay" />
+            </div>
+            <div class="min-w-0 md:col-span-2">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">Return URL</label>
+              <Input v-model="globepayConfig.return_url" placeholder="https://your-domain.com/order/success" />
+            </div>
+          </div>
         </div>
 
         <div>

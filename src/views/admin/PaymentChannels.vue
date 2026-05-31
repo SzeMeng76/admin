@@ -83,6 +83,7 @@ const providerTypeLabel = (value?: string) => {
     epusdt: t('admin.paymentChannels.providerTypes.epusdt'),
     okpay: t('admin.paymentChannels.providerTypes.okpay'),
     tokenpay: t('admin.paymentChannels.providerTypes.tokenpay'),
+    globepay: t('admin.paymentChannels.providerTypes.globepay'),
   }
   return map[value || ''] || value || '-'
 }
@@ -98,6 +99,10 @@ const channelTypeLabel = (value?: string) => {
     'usdt-trc20': t('admin.paymentChannels.channelTypes.usdtTrc20'),
     'usdc-trc20': t('admin.paymentChannels.channelTypes.usdcTrc20'),
     trx: t('admin.paymentChannels.channelTypes.trx'),
+    alipayhk: t('admin.paymentChannels.channelTypes.alipayhk'),
+    tng: t('admin.paymentChannels.channelTypes.tng'),
+    dana: t('admin.paymentChannels.channelTypes.dana'),
+    gcash: t('admin.paymentChannels.channelTypes.gcash'),
   }
   return map[value || ''] || value || '-'
 }
