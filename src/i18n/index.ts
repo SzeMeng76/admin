@@ -2952,8 +2952,15 @@ const messages = {
             walletRechargeSuccess: '用户成功充值通知',
             orderPaidSuccess: '订单支付成功通知',
             manualFulfillmentPending: '待人工交付订单提醒',
+            restockSuccess: '商品补货通知',
             exceptionAlert: '异常告警通知',
             exceptionThresholdHint: '异常告警阈值沿用“仪表盘规则”：低库存阈值、缺货商品阈值、待支付订单阈值、支付失败阈值。库存告警、通知巡检中的待支付和支付失败告警使用上方独立频率设置。',
+          },
+          restockBroadcast: {
+            title: '补货广播频道',
+            chatId: '频道 / 群组 Chat ID',
+            chatIdPlaceholder: '例如 -1001234567890',
+            hint: '商品补货时，将向此 Telegram 频道或群组发送带「立即购买」按钮的广播消息（独立于上方通知接收人）。仅支持数字 Chat ID，留空则不发送。需先开启上方「商品补货通知」场景。',
           },
           templates: {
             title: '模板配置（按当前语言编辑）',
@@ -6458,8 +6465,15 @@ const messages = {
             walletRechargeSuccess: '用戶儲值成功通知',
             orderPaidSuccess: '訂單支付成功通知',
             manualFulfillmentPending: '待人工交付訂單提醒',
+            restockSuccess: '商品補貨通知',
             exceptionAlert: '異常告警通知',
             exceptionThresholdHint: '異常告警閾值沿用「儀表板規則」：低庫存閾值、缺貨商品閾值、待支付訂單閾值、支付失敗閾值。庫存告警、通知巡檢中的待支付和支付失敗告警使用上方獨立頻率設定。',
+          },
+          restockBroadcast: {
+            title: '補貨廣播頻道',
+            chatId: '頻道 / 群組 Chat ID',
+            chatIdPlaceholder: '例如 -1001234567890',
+            hint: '商品補貨時，將向此 Telegram 頻道或群組發送帶「立即購買」按鈕的廣播訊息（獨立於上方通知接收人）。僅支援數字 Chat ID，留空則不發送。需先開啟上方「商品補貨通知」場景。',
           },
           templates: {
             title: '模板配置（依目前語言編輯）',
@@ -9964,8 +9978,15 @@ const messages = {
             walletRechargeSuccess: 'Wallet recharge succeeded',
             orderPaidSuccess: 'Order payment succeeded',
             manualFulfillmentPending: 'Manual fulfillment pending',
+            restockSuccess: 'Product restocked',
             exceptionAlert: 'Exception alerts',
             exceptionThresholdHint: 'Exception alert thresholds reuse Dashboard Rules: low stock, out-of-stock products, pending orders, and payment failures. Inventory alerts, pending and failed payment alerts in the notification scheduler use the independent frequency setting above.',
+          },
+          restockBroadcast: {
+            title: 'Restock Broadcast Channel',
+            chatId: 'Channel / Group Chat ID',
+            chatIdPlaceholder: 'e.g. -1001234567890',
+            hint: 'When a product is restocked, a broadcast message with a "Buy now" button is sent to this Telegram channel or group (independent of the notification recipients above). Numeric Chat IDs only; leave empty to disable. Requires the "Product restocked" scene above to be enabled.',
           },
           templates: {
             title: 'Templates (edit in current language)',

@@ -64,13 +64,18 @@ const notificationData = reactive({
     wallet_recharge_success: true,
     order_paid_success: true,
     manual_fulfillment_pending: true,
+    restock_success: true,
     exception_alert: true,
   },
   templates: {
     wallet_recharge_success: createNotificationSceneTemplate(),
     order_paid_success: createNotificationSceneTemplate(),
     manual_fulfillment_pending: createNotificationSceneTemplate(),
+    restock_success: createNotificationSceneTemplate(),
     exception_alert: createNotificationSceneTemplate(),
+  },
+  restock_broadcast: {
+    chat_id: '',
   },
 })
 
@@ -145,6 +150,7 @@ const testScenes = computed(() => [
   { value: 'wallet_recharge_success', label: t('admin.settings.notification.scenes.walletRechargeSuccess') },
   { value: 'order_paid_success', label: t('admin.settings.notification.scenes.orderPaidSuccess') },
   { value: 'manual_fulfillment_pending', label: t('admin.settings.notification.scenes.manualFulfillmentPending') },
+  { value: 'restock_success', label: t('admin.settings.notification.scenes.restockSuccess') },
   { value: 'exception_alert', label: t('admin.settings.notification.scenes.exceptionAlert') },
 ])
 
@@ -183,13 +189,18 @@ const fetchSettings = async () => {
     notificationData.scenes.wallet_recharge_success = !!notifScenes?.wallet_recharge_success
     notificationData.scenes.order_paid_success = !!notifScenes?.order_paid_success
     notificationData.scenes.manual_fulfillment_pending = !!notifScenes?.manual_fulfillment_pending
+    notificationData.scenes.restock_success = !!notifScenes?.restock_success
     notificationData.scenes.exception_alert = !!notifScenes?.exception_alert
 
     const notifTemplates = notification.templates as Record<string, unknown> | undefined
     notificationData.templates.wallet_recharge_success = normalizeNotificationSceneTemplate(notifTemplates?.wallet_recharge_success)
     notificationData.templates.order_paid_success = normalizeNotificationSceneTemplate(notifTemplates?.order_paid_success)
     notificationData.templates.manual_fulfillment_pending = normalizeNotificationSceneTemplate(notifTemplates?.manual_fulfillment_pending)
+    notificationData.templates.restock_success = normalizeNotificationSceneTemplate(notifTemplates?.restock_success)
     notificationData.templates.exception_alert = normalizeNotificationSceneTemplate(notifTemplates?.exception_alert)
+
+    const notifRestockBroadcast = notification.restock_broadcast as Record<string, unknown> | undefined
+    notificationData.restock_broadcast.chat_id = String(notifRestockBroadcast?.chat_id || '')
     syncTestTarget(true)
   } catch (err: any) {
     notifyError(err?.response?.data?.message || t('admin.settings.alerts.loadFailed'))
@@ -257,6 +268,7 @@ const notificationSceneLabel = (value: string) => {
     wallet_recharge_success: 'admin.settings.notification.scenes.walletRechargeSuccess',
     order_paid_success: 'admin.settings.notification.scenes.orderPaidSuccess',
     manual_fulfillment_pending: 'admin.settings.notification.scenes.manualFulfillmentPending',
+    restock_success: 'admin.settings.notification.scenes.restockSuccess',
     exception_alert: 'admin.settings.notification.scenes.exceptionAlert',
   }
   const key = keyMap[value]

@@ -41,13 +41,18 @@ interface NotificationData {
     wallet_recharge_success: boolean
     order_paid_success: boolean
     manual_fulfillment_pending: boolean
+    restock_success: boolean
     exception_alert: boolean
   }
   templates: {
     wallet_recharge_success: NotificationSceneTemplate
     order_paid_success: NotificationSceneTemplate
     manual_fulfillment_pending: NotificationSceneTemplate
+    restock_success: NotificationSceneTemplate
     exception_alert: NotificationSceneTemplate
+  }
+  restock_broadcast: {
+    chat_id: string
   }
 }
 
@@ -104,13 +109,18 @@ const form = reactive({
     wallet_recharge_success: true,
     order_paid_success: true,
     manual_fulfillment_pending: true,
+    restock_success: true,
     exception_alert: true,
   },
   templates: {
     wallet_recharge_success: createNotificationSceneTemplate(),
     order_paid_success: createNotificationSceneTemplate(),
     manual_fulfillment_pending: createNotificationSceneTemplate(),
+    restock_success: createNotificationSceneTemplate(),
     exception_alert: createNotificationSceneTemplate(),
+  },
+  restock_broadcast: {
+    chat_id: '',
   },
 })
 
@@ -129,7 +139,9 @@ const syncFromProps = () => {
   form.templates.wallet_recharge_success = deepCloneTemplate(props.data.templates.wallet_recharge_success)
   form.templates.order_paid_success = deepCloneTemplate(props.data.templates.order_paid_success)
   form.templates.manual_fulfillment_pending = deepCloneTemplate(props.data.templates.manual_fulfillment_pending)
+  form.templates.restock_success = deepCloneTemplate(props.data.templates.restock_success)
   form.templates.exception_alert = deepCloneTemplate(props.data.templates.exception_alert)
+  form.restock_broadcast.chat_id = props.data.restock_broadcast?.chat_id || ''
 }
 
 syncFromProps()
@@ -264,9 +276,13 @@ const save = async () => {
         wallet_recharge_success: form.scenes.wallet_recharge_success,
         order_paid_success: form.scenes.order_paid_success,
         manual_fulfillment_pending: form.scenes.manual_fulfillment_pending,
+        restock_success: form.scenes.restock_success,
         exception_alert: form.scenes.exception_alert,
       },
       templates: form.templates,
+      restock_broadcast: {
+        chat_id: form.restock_broadcast.chat_id.trim(),
+      },
     }
     await adminAPI.updateNotificationCenterSettings(payload)
     notifySuccess(t('admin.settings.alerts.saveSuccess'))
@@ -441,11 +457,27 @@ defineExpose({ save, submitting })
               <Label class="text-sm">{{ t('admin.settings.notification.scenes.manualFulfillmentPending') }}</Label>
             </div>
             <div class="flex items-center gap-2 text-sm">
+              <Switch v-model="form.scenes.restock_success" />
+              <Label class="text-sm">{{ t('admin.settings.notification.scenes.restockSuccess') }}</Label>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
               <Switch v-model="form.scenes.exception_alert" />
               <Label class="text-sm">{{ t('admin.settings.notification.scenes.exceptionAlert') }}</Label>
             </div>
           </div>
           <p class="mt-3 text-xs text-muted-foreground">{{ t('admin.settings.notification.scenes.exceptionThresholdHint') }}</p>
+        </div>
+
+        <div class="rounded-xl border border-border bg-muted/20 p-4">
+          <h3 class="text-sm font-semibold">{{ t('admin.settings.notification.restockBroadcast.title') }}</h3>
+          <div class="mt-4 space-y-2">
+            <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.notification.restockBroadcast.chatId') }}</label>
+            <Input
+              v-model="form.restock_broadcast.chat_id"
+              :placeholder="t('admin.settings.notification.restockBroadcast.chatIdPlaceholder')"
+            />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.notification.restockBroadcast.hint') }}</p>
+          </div>
         </div>
 
         <div class="rounded-xl border border-border">
@@ -475,6 +507,14 @@ defineExpose({ save, submitting })
               <div class="mt-3 space-y-2">
                 <Input v-model="form.templates.manual_fulfillment_pending[currentLang].title" :placeholder="t('admin.settings.notification.templates.titlePlaceholder')" />
                 <Textarea v-model="form.templates.manual_fulfillment_pending[currentLang].body" rows="4" :placeholder="t('admin.settings.notification.templates.bodyPlaceholder')" />
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-border bg-muted/10 p-4">
+              <h4 class="text-sm font-medium">{{ t('admin.settings.notification.scenes.restockSuccess') }}</h4>
+              <div class="mt-3 space-y-2">
+                <Input v-model="form.templates.restock_success[currentLang].title" :placeholder="t('admin.settings.notification.templates.titlePlaceholder')" />
+                <Textarea v-model="form.templates.restock_success[currentLang].body" rows="4" :placeholder="t('admin.settings.notification.templates.bodyPlaceholder')" />
               </div>
             </div>
 
