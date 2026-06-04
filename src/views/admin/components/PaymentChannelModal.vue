@@ -176,6 +176,17 @@ const globepayConfig = reactive({
   api_base_url: 'https://pay.globepay.co',
 })
 
+const binancepayConfig = reactive({
+  api_key: '',
+  secret_key: '',
+  return_url: '',
+  cancel_url: '',
+  api_base_url: 'https://bpay.binanceapi.com',
+  currency: 'USDT',
+  target_currency: '',
+  exchange_rate: '',
+})
+
 const epayChannelOptions = [
   { value: 'wechat', label: 'admin.paymentChannels.channelTypes.wechat' },
   { value: 'alipay', label: 'admin.paymentChannels.channelTypes.alipay' },
@@ -194,6 +205,7 @@ const globepayChannelOptions = [
 const officialChannelOptions = [
   { value: 'paypal', label: 'admin.paymentChannels.channelTypes.paypal' },
   { value: 'stripe', label: 'admin.paymentChannels.channelTypes.stripe' },
+  { value: 'binancepay', label: 'admin.paymentChannels.channelTypes.binancepay' },
   { value: 'alipay', label: 'admin.paymentChannels.channelTypes.alipay' },
   { value: 'wechat', label: 'admin.paymentChannels.channelTypes.wechat' },
 ]
@@ -287,6 +299,9 @@ const interactionModeOptions = computed(() => {
     return [{ value: 'redirect', label: 'admin.paymentChannels.interactionModes.redirect' }]
   }
   if (form.provider_type === 'official' && form.channel_type === 'stripe') {
+    return [{ value: 'redirect', label: 'admin.paymentChannels.interactionModes.redirect' }]
+  }
+  if (form.provider_type === 'official' && form.channel_type === 'binancepay') {
     return [{ value: 'redirect', label: 'admin.paymentChannels.interactionModes.redirect' }]
   }
   if (form.provider_type === 'official' && form.channel_type === 'alipay') {
@@ -432,6 +447,17 @@ const resetGlobepayConfig = () => {
   globepayConfig.api_base_url = 'https://pay.globepay.co'
 }
 
+const resetBinancepayConfig = () => {
+  binancepayConfig.api_key = ''
+  binancepayConfig.secret_key = ''
+  binancepayConfig.return_url = ''
+  binancepayConfig.cancel_url = ''
+  binancepayConfig.api_base_url = 'https://bpay.binanceapi.com'
+  binancepayConfig.currency = 'USDT'
+  binancepayConfig.target_currency = ''
+  binancepayConfig.exchange_rate = ''
+}
+
 const resetAllConfigs = () => {
   resetEpayConfig()
   resetPaypalConfig()
@@ -443,6 +469,7 @@ const resetAllConfigs = () => {
   resetTokenpayConfig()
   resetOkpayConfig()
   resetGlobepayConfig()
+  resetBinancepayConfig()
 }
 
 // --- Apply functions ---
@@ -563,6 +590,17 @@ const applyGlobepayConfig = (raw: Record<string, unknown>) => {
   globepayConfig.notify_url = String(raw.notify_url || '')
   globepayConfig.return_url = String(raw.return_url || '')
   globepayConfig.api_base_url = String(raw.api_base_url || 'https://pay.globepay.co')
+}
+
+const applyBinancepayConfig = (raw: Record<string, unknown>) => {
+  binancepayConfig.api_key = String(raw.api_key || '')
+  binancepayConfig.secret_key = String(raw.secret_key || '')
+  binancepayConfig.return_url = String(raw.return_url || '')
+  binancepayConfig.cancel_url = String(raw.cancel_url || '')
+  binancepayConfig.api_base_url = String(raw.api_base_url || 'https://bpay.binanceapi.com')
+  binancepayConfig.currency = String(raw.currency || 'USDT')
+  binancepayConfig.target_currency = String(raw.target_currency || '')
+  binancepayConfig.exchange_rate = String(raw.exchange_rate || '')
 }
 
 // --- Build functions ---
@@ -779,6 +817,25 @@ const buildGlobepayConfig = () => {
   return config
 }
 
+const buildBinancepayConfig = () => {
+  const config: Record<string, unknown> = {}
+  const setIfNotEmpty = (key: string, value: string) => {
+    const trimmed = String(value || '').trim()
+    if (trimmed !== '') {
+      config[key] = trimmed
+    }
+  }
+  setIfNotEmpty('api_key', binancepayConfig.api_key)
+  setIfNotEmpty('secret_key', binancepayConfig.secret_key)
+  setIfNotEmpty('return_url', binancepayConfig.return_url)
+  setIfNotEmpty('cancel_url', binancepayConfig.cancel_url)
+  setIfNotEmpty('api_base_url', binancepayConfig.api_base_url)
+  setIfNotEmpty('currency', binancepayConfig.currency)
+  setIfNotEmpty('target_currency', binancepayConfig.target_currency)
+  setIfNotEmpty('exchange_rate', binancepayConfig.exchange_rate)
+  return config
+}
+
 // --- Watchers for provider_type / channel_type ---
 
 watch(
@@ -918,6 +975,7 @@ watch(
           applyTokenpayConfig(channel.config_json)
           applyOkpayConfig(channel.config_json)
           applyGlobepayConfig(channel.config_json)
+          applyBinancepayConfig(channel.config_json)
         } else {
           resetAllConfigs()
         }
@@ -1013,6 +1071,13 @@ const handleSubmit = async () => {
     configJson = {
       ...configJson,
       ...buildGlobepayConfig(),
+    }
+  } else if (form.provider_type === 'official' && form.channel_type === 'binancepay') {
+    delete configJson.target_currency
+    delete configJson.exchange_rate
+    configJson = {
+      ...configJson,
+      ...buildBinancepayConfig(),
     }
   }
 
@@ -1554,6 +1619,45 @@ const closeModal = () => {
             </div>
           </div>
           <div class="mt-3 text-xs text-muted-foreground">{{ t('admin.paymentChannels.modal.okpayHint') }}</div>
+        </div>
+
+        <div v-if="form.provider_type === 'official' && form.channel_type === 'binancepay'" class="min-w-0 rounded-xl border border-border bg-muted/20 p-4 overflow-hidden">
+          <div class="text-sm font-semibold text-foreground mb-3">{{ t('admin.paymentChannels.modal.binancepaySection') }}</div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 [&>*]:min-w-0">
+            <div class="min-w-0 md:col-span-2">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.binancepayApiKey') }}</label>
+              <Input v-model="binancepayConfig.api_key" :placeholder="t('admin.paymentChannels.modal.binancepayApiKeyPlaceholder')" />
+            </div>
+            <div class="min-w-0 md:col-span-2">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.binancepaySecretKey') }}</label>
+              <Input v-model="binancepayConfig.secret_key" :placeholder="t('admin.paymentChannels.modal.binancepaySecretKeyPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.binancepayReturnUrl') }}</label>
+              <Input v-model="binancepayConfig.return_url" :placeholder="t('admin.paymentChannels.modal.binancepayReturnUrlPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.binancepayCancelUrl') }}</label>
+              <Input v-model="binancepayConfig.cancel_url" :placeholder="t('admin.paymentChannels.modal.binancepayCancelUrlPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.binancepayCurrency') }}</label>
+              <Input v-model="binancepayConfig.currency" placeholder="USDT" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.binancepayApiBaseUrl') }}</label>
+              <Input v-model="binancepayConfig.api_base_url" placeholder="https://bpay.binanceapi.com" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.targetCurrency') }}</label>
+              <Input v-model="binancepayConfig.target_currency" :placeholder="t('admin.paymentChannels.modal.targetCurrencyPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.exchangeRate') }}</label>
+              <Input v-model="binancepayConfig.exchange_rate" :placeholder="t('admin.paymentChannels.modal.exchangeRatePlaceholder')" />
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-muted-foreground">{{ t('admin.paymentChannels.modal.binancepayHint') }}</div>
         </div>
 
         <div v-if="form.provider_type === 'globepay'" class="min-w-0 rounded-xl border border-border bg-muted/20 p-4 overflow-hidden">

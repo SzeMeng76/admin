@@ -12,6 +12,7 @@ const form = reactive({
   payment_callback: '',
   paypal_webhook: '',
   stripe_webhook: '',
+  binancepay_webhook: '',
   upstream_callback: '',
 })
 const saving = ref(false)
@@ -29,6 +30,7 @@ const load = async () => {
       form.payment_callback = data.payment_callback || ''
       form.paypal_webhook = data.paypal_webhook || ''
       form.stripe_webhook = data.stripe_webhook || ''
+      form.binancepay_webhook = data.binancepay_webhook || ''
       form.upstream_callback = data.upstream_callback || ''
     }
   } catch {
@@ -41,6 +43,7 @@ const save = async () => {
     { key: 'payment_callback', value: form.payment_callback },
     { key: 'paypal_webhook', value: form.paypal_webhook },
     { key: 'stripe_webhook', value: form.stripe_webhook },
+    { key: 'binancepay_webhook', value: form.binancepay_webhook },
     { key: 'upstream_callback', value: form.upstream_callback },
   ]
   const nonEmptyPaths: string[] = []
@@ -72,6 +75,7 @@ const save = async () => {
         payment_callback: form.payment_callback.trim(),
         paypal_webhook: form.paypal_webhook.trim(),
         stripe_webhook: form.stripe_webhook.trim(),
+        binancepay_webhook: form.binancepay_webhook.trim(),
         upstream_callback: form.upstream_callback.trim(),
       },
     } as any)
@@ -116,6 +120,11 @@ onMounted(load)
             <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.stripeWebhook') }}</label>
             <Input v-model="form.stripe_webhook" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" />
             <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: /api/v1/payments/webhook/stripe</p>
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.binancepayWebhook') }}</label>
+            <Input v-model="form.binancepay_webhook" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: /api/v1/payments/webhook/binancepay</p>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.upstreamCallback') }}</label>
