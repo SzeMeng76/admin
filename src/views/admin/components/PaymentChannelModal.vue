@@ -168,6 +168,16 @@ const okpayConfig = reactive({
   display_name: '',
 })
 
+const dujiaopayConfig = reactive({
+  api_base_url: 'https://www.dujiaopay.com',
+  api_key_id: '',
+  api_secret: '',
+  webhook_secret: '',
+  fiat_currency: 'CNY',
+  success_url: '',
+  cancel_url: '',
+})
+
 const globepayConfig = reactive({
   partner_code: '',
   credential_code: '',
@@ -221,10 +231,32 @@ const okpayChannelOptions = [
   { value: 'trx', label: 'admin.paymentChannels.channelTypes.trx' },
 ]
 
+const dujiaopayChannelOptions = [
+  { value: 'tron-usdt', label: 'admin.paymentChannels.channelTypes.tronUsdt' },
+  { value: 'tron-trx', label: 'admin.paymentChannels.channelTypes.tronTrx' },
+  { value: 'ethereum-usdt', label: 'admin.paymentChannels.channelTypes.ethereumUsdt' },
+  { value: 'ethereum-usdc', label: 'admin.paymentChannels.channelTypes.ethereumUsdc' },
+  { value: 'ethereum-eth', label: 'admin.paymentChannels.channelTypes.ethereumEth' },
+  { value: 'bsc-usdt', label: 'admin.paymentChannels.channelTypes.bscUsdt' },
+  { value: 'bsc-bnb', label: 'admin.paymentChannels.channelTypes.bscBnb' },
+  { value: 'polygon-usdc', label: 'admin.paymentChannels.channelTypes.polygonUsdc' },
+  { value: 'polygon-usdt0', label: 'admin.paymentChannels.channelTypes.polygonUsdt0' },
+  { value: 'base-usdc', label: 'admin.paymentChannels.channelTypes.baseUsdc' },
+  { value: 'arbitrum-usdc', label: 'admin.paymentChannels.channelTypes.arbitrumUsdc' },
+  { value: 'arbitrum-usdt0', label: 'admin.paymentChannels.channelTypes.arbitrumUsdt0' },
+  { value: 'plasma-usdt0', label: 'admin.paymentChannels.channelTypes.plasmaUsdt0' },
+  { value: 'x-layer-usdt0', label: 'admin.paymentChannels.channelTypes.xLayerUsdt0' },
+  { value: 'solana-usdc', label: 'admin.paymentChannels.channelTypes.solanaUsdc' },
+  { value: 'solana-usdt', label: 'admin.paymentChannels.channelTypes.solanaUsdt' },
+  { value: 'aptos-usdc', label: 'admin.paymentChannels.channelTypes.aptosUsdc' },
+  { value: 'aptos-usdt', label: 'admin.paymentChannels.channelTypes.aptosUsdt' },
+]
+
 const channelOptions = [
   ...epayChannelOptions,
   ...officialChannelOptions,
   ...okpayChannelOptions,
+  ...dujiaopayChannelOptions,
 ]
 
 const paymentTypeOptions = computed(() => [
@@ -260,6 +292,9 @@ const formChannelOptions = computed(() => {
   if (form.provider_type === 'okpay') {
     return okpayChannelOptions
   }
+  if (form.provider_type === 'dujiaopay') {
+    return dujiaopayChannelOptions
+  }
   if (form.provider_type === 'globepay') {
     return globepayChannelOptions
   }
@@ -290,6 +325,12 @@ const interactionModeOptions = computed(() => {
     ]
   }
   if (form.provider_type === 'okpay') {
+    return [
+      { value: 'qr', label: 'admin.paymentChannels.interactionModes.qr' },
+      { value: 'redirect', label: 'admin.paymentChannels.interactionModes.redirect' },
+    ]
+  }
+  if (form.provider_type === 'dujiaopay') {
     return [
       { value: 'qr', label: 'admin.paymentChannels.interactionModes.qr' },
       { value: 'redirect', label: 'admin.paymentChannels.interactionModes.redirect' },
@@ -439,6 +480,16 @@ const resetOkpayConfig = () => {
   okpayConfig.display_name = ''
 }
 
+const resetDujiaoPayConfig = () => {
+  dujiaopayConfig.api_base_url = 'https://www.dujiaopay.com'
+  dujiaopayConfig.api_key_id = ''
+  dujiaopayConfig.api_secret = ''
+  dujiaopayConfig.webhook_secret = ''
+  dujiaopayConfig.fiat_currency = 'CNY'
+  dujiaopayConfig.success_url = 'https://yourdomain.com/pay'
+  dujiaopayConfig.cancel_url = 'https://yourdomain.com/pay'
+}
+
 const resetGlobepayConfig = () => {
   globepayConfig.partner_code = ''
   globepayConfig.credential_code = ''
@@ -468,6 +519,7 @@ const resetAllConfigs = () => {
   resetEpusdtConfig()
   resetTokenpayConfig()
   resetOkpayConfig()
+  resetDujiaoPayConfig()
   resetGlobepayConfig()
   resetBinancepayConfig()
 }
@@ -582,6 +634,16 @@ const applyOkpayConfig = (raw: Record<string, unknown>) => {
   okpayConfig.return_url = String(raw.return_url || '')
   okpayConfig.callback_url = String(raw.callback_url || '')
   okpayConfig.display_name = String(raw.display_name || '')
+}
+
+const applyDujiaoPayConfig = (raw: Record<string, unknown>) => {
+  dujiaopayConfig.api_base_url = String(raw.api_base_url || 'https://www.dujiaopay.com')
+  dujiaopayConfig.api_key_id = String(raw.api_key_id || '')
+  dujiaopayConfig.api_secret = String(raw.api_secret || '')
+  dujiaopayConfig.webhook_secret = String(raw.webhook_secret || '')
+  dujiaopayConfig.fiat_currency = String(raw.fiat_currency || 'CNY').toUpperCase()
+  dujiaopayConfig.success_url = String(raw.success_url || '')
+  dujiaopayConfig.cancel_url = String(raw.cancel_url || '')
 }
 
 const applyGlobepayConfig = (raw: Record<string, unknown>) => {
@@ -801,6 +863,27 @@ const buildOkpayConfig = () => {
   return config
 }
 
+const buildDujiaoPayConfig = () => {
+  const config: Record<string, unknown> = {}
+  const setIfNotEmpty = (key: string, value: string) => {
+    const trimmed = String(value || '').trim()
+    if (trimmed !== '') {
+      config[key] = trimmed
+    }
+  }
+  setIfNotEmpty('api_base_url', dujiaopayConfig.api_base_url)
+  setIfNotEmpty('api_key_id', dujiaopayConfig.api_key_id)
+  setIfNotEmpty('api_secret', dujiaopayConfig.api_secret)
+  setIfNotEmpty('webhook_secret', dujiaopayConfig.webhook_secret)
+  setIfNotEmpty('fiat_currency', dujiaopayConfig.fiat_currency.toUpperCase())
+  setIfNotEmpty('success_url', dujiaopayConfig.success_url)
+  setIfNotEmpty('cancel_url', dujiaopayConfig.cancel_url)
+  if (form.channel_type) {
+    config.token_id = form.channel_type
+  }
+  return config
+}
+
 const buildGlobepayConfig = () => {
   const config: Record<string, unknown> = {}
   const setIfNotEmpty = (key: string, value: string) => {
@@ -868,6 +951,11 @@ watch(
       const allowed = okpayChannelOptions.map((option) => option.value)
       if (!allowed.includes(form.channel_type)) {
         form.channel_type = allowed[0] || 'usdt'
+      }
+    } else if (value === 'dujiaopay') {
+      const allowed = dujiaopayChannelOptions.map((option) => option.value)
+      if (!allowed.includes(form.channel_type)) {
+        form.channel_type = allowed[0] || 'tron-usdt'
       }
     } else if (value === 'globepay') {
       const allowed = globepayChannelOptions.map((option) => option.value)
@@ -974,6 +1062,7 @@ watch(
           applyEpusdtConfig(channel.config_json)
           applyTokenpayConfig(channel.config_json)
           applyOkpayConfig(channel.config_json)
+          applyDujiaoPayConfig(channel.config_json)
           applyGlobepayConfig(channel.config_json)
           applyBinancepayConfig(channel.config_json)
         } else {
@@ -1067,6 +1156,11 @@ const handleSubmit = async () => {
       ...configJson,
       ...buildOkpayConfig(),
     }
+  } else if (form.provider_type === 'dujiaopay') {
+    configJson = {
+      ...configJson,
+      ...buildDujiaoPayConfig(),
+    }
   } else if (form.provider_type === 'globepay') {
     configJson = {
       ...configJson,
@@ -1143,6 +1237,14 @@ const closeModal = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="official">{{ t('admin.paymentChannels.providerTypes.official') }}</SelectItem>
+                <SelectItem value="dujiaopay">
+                  <span class="flex w-full items-center justify-between gap-2">
+                    <span>{{ t('admin.paymentChannels.providerTypes.dujiaopay') }}</span>
+                    <span class="shrink-0 rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-emerald-600 dark:text-emerald-400">
+                      {{ t('admin.paymentChannels.providerOfficialCertified') }}
+                    </span>
+                  </span>
+                </SelectItem>
                 <SelectItem value="epay">{{ t('admin.paymentChannels.providerTypes.epay') }}</SelectItem>
                 <SelectItem value="bepusdt">{{ t('admin.paymentChannels.providerTypes.bepusdt') }}</SelectItem>
                 <SelectItem value="epusdt">{{ t('admin.paymentChannels.providerTypes.epusdt') }}</SelectItem>
@@ -1619,6 +1721,41 @@ const closeModal = () => {
             </div>
           </div>
           <div class="mt-3 text-xs text-muted-foreground">{{ t('admin.paymentChannels.modal.okpayHint') }}</div>
+        </div>
+
+        <div v-if="form.provider_type === 'dujiaopay'" class="min-w-0 rounded-xl border border-border bg-muted/20 p-4 overflow-hidden">
+          <div class="text-sm font-semibold text-foreground mb-3">{{ t('admin.paymentChannels.modal.dujiaopaySection') }}</div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 [&>*]:min-w-0">
+            <div class="min-w-0 md:col-span-2">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.dujiaopayApiBaseUrl') }}</label>
+              <Input v-model="dujiaopayConfig.api_base_url" :placeholder="t('admin.paymentChannels.modal.dujiaopayApiBaseUrlPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.dujiaopayApiKeyId') }}</label>
+              <Input v-model="dujiaopayConfig.api_key_id" :placeholder="t('admin.paymentChannels.modal.dujiaopayApiKeyIdPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.dujiaopayFiatCurrency') }}</label>
+              <Input v-model="dujiaopayConfig.fiat_currency" :placeholder="t('admin.paymentChannels.modal.dujiaopayFiatCurrencyPlaceholder')" />
+            </div>
+            <div class="min-w-0 md:col-span-2">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.dujiaopayApiSecret') }}</label>
+              <Textarea v-model="dujiaopayConfig.api_secret" rows="3" :placeholder="t('admin.paymentChannels.modal.dujiaopayApiSecretPlaceholder')" />
+            </div>
+            <div class="min-w-0 md:col-span-2">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.dujiaopayWebhookSecret') }}</label>
+              <Textarea v-model="dujiaopayConfig.webhook_secret" rows="3" :placeholder="t('admin.paymentChannels.modal.dujiaopayWebhookSecretPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.dujiaopaySuccessUrl') }}</label>
+              <Input v-model="dujiaopayConfig.success_url" :placeholder="t('admin.paymentChannels.modal.dujiaopaySuccessUrlPlaceholder')" />
+            </div>
+            <div class="min-w-0">
+              <label class="block text-xs font-medium text-muted-foreground mb-1.5">{{ t('admin.paymentChannels.modal.dujiaopayCancelUrl') }}</label>
+              <Input v-model="dujiaopayConfig.cancel_url" :placeholder="t('admin.paymentChannels.modal.dujiaopayCancelUrlPlaceholder')" />
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-muted-foreground">{{ t('admin.paymentChannels.modal.dujiaopayHint') }}</div>
         </div>
 
         <div v-if="form.provider_type === 'official' && form.channel_type === 'binancepay'" class="min-w-0 rounded-xl border border-border bg-muted/20 p-4 overflow-hidden">

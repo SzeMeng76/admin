@@ -4,12 +4,21 @@ import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  CALLBACK_ROUTE_KEYS,
+  DEFAULT_CALLBACK_ROUTE_PATHS,
+  buildCallbackRoutesSavePayload,
+  getCallbackRouteDisplayValue,
+  toCallbackRouteSaveValue,
+  type CallbackRouteKey,
+} from '@/utils/callbackRoutes'
 import { notifyError, notifySuccess } from '@/utils/notify'
 
 const { t } = useI18n()
 
 const form = reactive({
   payment_callback: '',
+  dujiaopay_webhook: '',
   paypal_webhook: '',
   stripe_webhook: '',
   binancepay_webhook: '',
@@ -27,28 +36,29 @@ const load = async () => {
     const res = await adminAPI.getSettings({ key: 'callback_routes_config' })
     const data = res.data?.data as Record<string, string> | null
     if (data) {
-      form.payment_callback = data.payment_callback || ''
-      form.paypal_webhook = data.paypal_webhook || ''
-      form.stripe_webhook = data.stripe_webhook || ''
-      form.binancepay_webhook = data.binancepay_webhook || ''
-      form.upstream_callback = data.upstream_callback || ''
+      CALLBACK_ROUTE_KEYS.forEach((key) => {
+        form[key] = data[key] || ''
+      })
     }
   } catch {
     // 未配置时保持空值
   }
 }
 
+const displayRouteValue = (key: CallbackRouteKey) => {
+  return getCallbackRouteDisplayValue(key, form[key])
+}
+
+const setRouteValue = (key: CallbackRouteKey, value: string | number) => {
+  form[key] = toCallbackRouteSaveValue(key, value)
+}
+
 const save = async () => {
-  const fields = [
-    { key: 'payment_callback', value: form.payment_callback },
-    { key: 'paypal_webhook', value: form.paypal_webhook },
-    { key: 'stripe_webhook', value: form.stripe_webhook },
-    { key: 'binancepay_webhook', value: form.binancepay_webhook },
-    { key: 'upstream_callback', value: form.upstream_callback },
-  ]
+  const payload = buildCallbackRoutesSavePayload(form)
+  const fields = CALLBACK_ROUTE_KEYS.map((key) => ({ key, value: payload[key] }))
   const nonEmptyPaths: string[] = []
   for (const field of fields) {
-    const v = field.value.trim().replace(/\/+$/, '')
+    const v = field.value
     if (v && !v.startsWith('/api/')) {
       notifyError(t('admin.settings.callbackRoutes.mustStartWithApi'))
       return
@@ -71,13 +81,7 @@ const save = async () => {
   try {
     await adminAPI.updateSettings({
       key: 'callback_routes_config',
-      value: {
-        payment_callback: form.payment_callback.trim(),
-        paypal_webhook: form.paypal_webhook.trim(),
-        stripe_webhook: form.stripe_webhook.trim(),
-        binancepay_webhook: form.binancepay_webhook.trim(),
-        upstream_callback: form.upstream_callback.trim(),
-      },
+      value: payload,
     } as any)
     notifySuccess(t('admin.settings.saved'))
   } catch (err: any) {
@@ -108,28 +112,33 @@ onMounted(load)
         <div class="grid grid-cols-1 gap-6">
           <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.paymentCallback') }}</label>
-            <Input v-model="form.payment_callback" type="text" :placeholder="t('admin.settings.callbackRoutes.paymentCallbackPlaceholder')" />
-            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: /api/v1/payments/callback</p>
+            <Input :model-value="displayRouteValue('payment_callback')" type="text" :placeholder="t('admin.settings.callbackRoutes.paymentCallbackPlaceholder')" @update:model-value="(value) => setRouteValue('payment_callback', value)" />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: {{ DEFAULT_CALLBACK_ROUTE_PATHS.payment_callback }}</p>
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.dujiaopayWebhook') }}</label>
+            <Input :model-value="displayRouteValue('dujiaopay_webhook')" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" @update:model-value="(value) => setRouteValue('dujiaopay_webhook', value)" />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: {{ DEFAULT_CALLBACK_ROUTE_PATHS.dujiaopay_webhook }}</p>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.paypalWebhook') }}</label>
-            <Input v-model="form.paypal_webhook" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" />
-            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: /api/v1/payments/webhook/paypal</p>
+            <Input :model-value="displayRouteValue('paypal_webhook')" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" @update:model-value="(value) => setRouteValue('paypal_webhook', value)" />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: {{ DEFAULT_CALLBACK_ROUTE_PATHS.paypal_webhook }}</p>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.stripeWebhook') }}</label>
-            <Input v-model="form.stripe_webhook" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" />
-            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: /api/v1/payments/webhook/stripe</p>
+            <Input :model-value="displayRouteValue('stripe_webhook')" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" @update:model-value="(value) => setRouteValue('stripe_webhook', value)" />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: {{ DEFAULT_CALLBACK_ROUTE_PATHS.stripe_webhook }}</p>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.binancepayWebhook') }}</label>
-            <Input v-model="form.binancepay_webhook" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" />
-            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: /api/v1/payments/webhook/binancepay</p>
+            <Input :model-value="displayRouteValue('binancepay_webhook')" type="text" :placeholder="t('admin.settings.callbackRoutes.webhookPlaceholder')" @update:model-value="(value) => setRouteValue('binancepay_webhook', value)" />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: {{ DEFAULT_CALLBACK_ROUTE_PATHS.binancepay_webhook }}</p>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">{{ t('admin.settings.callbackRoutes.upstreamCallback') }}</label>
-            <Input v-model="form.upstream_callback" type="text" :placeholder="t('admin.settings.callbackRoutes.callbackPlaceholder')" />
-            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: /api/v1/upstream/callback</p>
+            <Input :model-value="displayRouteValue('upstream_callback')" type="text" :placeholder="t('admin.settings.callbackRoutes.callbackPlaceholder')" @update:model-value="(value) => setRouteValue('upstream_callback', value)" />
+            <p class="text-xs text-muted-foreground">{{ t('admin.settings.callbackRoutes.defaultPath') }}: {{ DEFAULT_CALLBACK_ROUTE_PATHS.upstream_callback }}</p>
           </div>
         </div>
 
