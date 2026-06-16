@@ -209,6 +209,54 @@ const routes = [
         meta: { permission: 'GET:/admin/affiliates/withdraws' },
       },
       {
+        path: 'resellers/operations',
+        name: 'resellers-operations',
+        component: () => import('@/views/admin/ResellerOperationsDashboard.vue'),
+        meta: { permission: 'GET:/admin/resellers/operations/overview' },
+      },
+      {
+        path: 'resellers/profiles',
+        name: 'resellers-profiles',
+        component: () => import('@/views/admin/ResellerProfiles.vue'),
+        meta: { permission: 'GET:/admin/resellers/profiles' },
+      },
+      {
+        path: 'resellers/domains',
+        name: 'resellers-domains',
+        component: () => import('@/views/admin/ResellerDomains.vue'),
+        meta: { permission: 'GET:/admin/resellers/domains' },
+      },
+      {
+        path: 'resellers/site-configs',
+        name: 'resellers-site-configs',
+        component: () => import('@/views/admin/ResellerSiteConfigs.vue'),
+        meta: { permission: 'GET:/admin/resellers/site-configs' },
+      },
+      {
+        path: 'resellers/product-settings',
+        name: 'resellers-product-settings',
+        component: () => import('@/views/admin/ResellerProductSettings.vue'),
+        meta: { permission: 'GET:/admin/resellers/product-settings' },
+      },
+      {
+        path: 'resellers/ledger-entries',
+        name: 'resellers-ledger-entries',
+        component: () => import('@/views/admin/ResellerLedgerEntries.vue'),
+        meta: { permission: 'GET:/admin/resellers/ledger-entries' },
+      },
+      {
+        path: 'resellers/balance-accounts',
+        name: 'resellers-balance-accounts',
+        component: () => import('@/views/admin/ResellerBalanceAccounts.vue'),
+        meta: { permission: 'GET:/admin/resellers/balance-accounts' },
+      },
+      {
+        path: 'resellers/withdraws',
+        name: 'resellers-withdraws',
+        component: () => import('@/views/admin/ResellerWithdraws.vue'),
+        meta: { permission: 'GET:/admin/resellers/withdraws' },
+      },
+      {
         path: 'authz',
         name: 'authz',
         component: () => import('@/views/admin/Authz.vue'),
@@ -328,6 +376,9 @@ const PAYMENT_PROTECTED_ROUTE_NAMES = new Set<string>([
   'reconciliation',
   'affiliates-withdraws',
   'affiliates-commissions',
+  'resellers-ledger-entries',
+  'resellers-balance-accounts',
+  'resellers-withdraws',
 ])
 
 router.beforeEach(async (to) => {

@@ -785,3 +785,325 @@ export interface AdminAffiliateWithdraw {
   user_email?: string
   affiliate_profile?: { id: number; user_id: number; code: string; user_email?: string; user_display_name?: string; user?: { id: number; email: string; display_name?: string } }
 }
+
+export interface AdminResellerUser {
+  id: number
+  email?: string
+  display_name?: string
+  username?: string
+}
+
+export interface AdminResellerProfileRef {
+  id: number
+  user_id: number
+  status?: string
+  settlement_status?: string
+  user?: AdminResellerUser
+}
+
+export interface AdminResellerProfile {
+  id: number
+  user_id: number
+  status: string
+  apply_reason?: string
+  reject_reason?: string
+  default_markup_percent: string
+  max_markup_percent: string
+  settlement_status: string
+  reviewed_by?: number
+  reviewed_at?: string
+  created_at: string
+  updated_at: string
+  user?: AdminResellerUser
+}
+
+export interface AdminResellerDomain {
+  id: number
+  reseller_id: number
+  domain: string
+  type: string
+  verification_token?: string
+  verification_status: string
+  status: string
+  is_primary: boolean
+  verified_at?: string
+  created_at: string
+  updated_at: string
+  profile?: AdminResellerProfileRef
+}
+
+export interface AdminResellerLocalizedText {
+  'zh-CN'?: string
+  'zh-TW'?: string
+  'en-US'?: string
+  [key: string]: string | undefined
+}
+
+export interface AdminResellerSiteConfigPayload {
+  site_name?: string
+  logo?: string
+  favicon?: string
+  announcement?: {
+    enabled?: boolean
+    type?: string
+    title?: AdminResellerLocalizedText
+    content?: AdminResellerLocalizedText
+  }
+  support?: {
+    telegram?: string
+    whatsapp?: string
+    email?: string
+    support_url?: string
+  }
+  seo?: {
+    title?: AdminResellerLocalizedText
+    keywords?: AdminResellerLocalizedText
+    description?: AdminResellerLocalizedText
+    default_og_image?: string
+  }
+  footer_links?: Array<{
+    name?: AdminResellerLocalizedText
+    url?: string
+  }>
+  nav_config?: {
+    builtin?: Record<string, boolean>
+    custom_items?: Array<{
+      name?: AdminResellerLocalizedText
+      url?: string
+      enabled?: boolean
+    }>
+  }
+  theme?: {
+    primary_color?: string
+    accent_color?: string
+    surface_color?: string
+  }
+}
+
+export interface AdminResellerSiteConfig extends Required<Pick<AdminResellerSiteConfigPayload, 'announcement' | 'support' | 'seo' | 'nav_config' | 'theme'>> {
+  id: number
+  reseller_id: number
+  site_name: string
+  logo: string
+  favicon: string
+  footer_links: Array<{
+    name?: AdminResellerLocalizedText
+    url?: string
+  }>
+  profile?: AdminResellerProfileRef
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminResellerProductSettingProduct {
+  id: number
+  slug: string
+  title: LocalizedText
+  price_amount: string | number
+  is_active: boolean
+}
+
+export interface AdminResellerProductSetting {
+  id: number
+  reseller_id: number
+  product_id: number
+  sku_id: number
+  is_listed: boolean
+  pricing_mode: string
+  markup_percent: string | number
+  fixed_markup_amount: string | number
+  fixed_price_amount: string | number
+  sort_order: number
+  created_at: string
+  updated_at: string
+  profile?: AdminResellerProfileRef
+  product?: AdminResellerProductSettingProduct
+}
+
+export interface AdminResellerProductSettingRule {
+  id?: number
+  product_id: number
+  sku_id: number
+  is_listed: boolean
+  pricing_mode: string
+  markup_percent: string | number
+  fixed_markup_amount: string | number
+  fixed_price_amount: string | number
+  effective_price_amount?: string | number
+  rule_source?: string
+  sort_order: number
+  updated_at?: string
+}
+
+export interface AdminResellerProductSettingSKU {
+  id: number
+  sku_code: string
+  spec_values: Record<string, string>
+  base_price_amount: string | number
+  is_active: boolean
+  setting?: AdminResellerProductSettingRule
+  effective_price_amount?: string | number
+}
+
+export interface AdminResellerProductSettingDetail {
+  product: AdminResellerProductSettingProduct
+  product_setting?: AdminResellerProductSettingRule
+  skus: AdminResellerProductSettingSKU[]
+}
+
+export interface AdminResellerProductSettingPayloadItem {
+  sku_id: number
+  is_listed: boolean
+  pricing_mode: string
+  markup_percent: string
+  fixed_markup_amount: string
+  fixed_price_amount: string
+  sort_order: number
+}
+
+export interface AdminResellerProductSettingUpdatePayload {
+  settings: AdminResellerProductSettingPayloadItem[]
+}
+
+export interface AdminResellerProfileApprovePayload {
+  default_markup_percent?: string
+  max_markup_percent?: string
+}
+
+export interface AdminResellerReasonPayload {
+  reason?: string
+}
+
+export interface AdminResellerOrderRef {
+  id: number
+  order_no: string
+}
+
+export interface AdminResellerLedgerEntry {
+  id: number
+  reseller_id: number
+  order_id?: number
+  type: string
+  amount: number | string
+  currency: string
+  idempotency_key: string
+  metadata_json?: Record<string, unknown>
+  status: string
+  available_at?: string
+  withdraw_request_id?: number
+  remark?: string
+  created_at: string
+  updated_at: string
+  profile?: AdminResellerProfileRef
+  order?: AdminResellerOrderRef
+}
+
+export interface AdminResellerBalanceAccount {
+  id: number
+  reseller_id: number
+  currency: string
+  status: string
+  available_amount_cache: number | string
+  locked_amount_cache: number | string
+  negative_amount_cache: number | string
+  last_ledger_entry_id: number
+  risk_note?: string
+  created_at: string
+  updated_at: string
+  profile?: AdminResellerProfileRef
+}
+
+export interface AdminResellerWithdraw {
+  id: number
+  reseller_id: number
+  amount: number | string
+  currency: string
+  channel: string
+  account: string
+  status: string
+  reject_reason?: string
+  processed_by?: number
+  processed_at?: string
+  processor?: { id?: number; username?: string; [key: string]: unknown } | string
+  created_at: string
+  updated_at: string
+  profile?: AdminResellerProfileRef
+}
+
+export interface AdminResellerOperationsAlert {
+  type: string
+  level: string
+  value: number
+}
+
+export interface AdminResellerOperationsOverview {
+  range: string
+  from: string
+  to: string
+  timezone: string
+  lifecycle: {
+    profiles_total: number
+    profiles_pending_review: number
+    profiles_active: number
+    profiles_rejected: number
+    profiles_disabled: number
+    profiles_settlement_frozen: number
+    domains_total: number
+    domains_pending_review: number
+    domains_active: number
+    domains_disabled: number
+    domains_pending_verification: number
+    domains_verified: number
+    custom_domains: number
+    subdomains: number
+    site_configs_total: number
+    active_profiles_without_site_config: number
+  }
+  orders: {
+    orders_total: number
+    paid_orders: number
+    completed_orders: number
+    refunded_orders: number
+    self_dealing_blocked_orders: number
+    active_resellers_with_orders: number
+    average_paid_orders_per_active_reseller: string
+  }
+  top_resellers: Array<{
+    reseller_id: number
+    user_id: number
+    email?: string
+    display_name?: string
+    orders_total: number
+    paid_orders: number
+    active_domains: number
+    site_configured: boolean
+    last_order_at?: string
+  }>
+  alerts: AdminResellerOperationsAlert[]
+}
+
+export interface AdminResellerOperationsFinance {
+  range: string
+  from: string
+  to: string
+  timezone: string
+  period_currency_rows: Array<{
+    currency: string
+    orders_total: number
+    paid_orders: number
+    gmv_paid: string
+    profit_earned: string
+    refund_deducted: string
+    withdraw_paid: string
+  }>
+  current_currency_rows: Array<{
+    currency: string
+    available_balance: string
+    locked_balance: string
+    negative_balance: string
+    pending_withdraw_count: number
+    pending_withdraw_amount: string
+    negative_balance_accounts: number
+    frozen_balance_accounts: number
+  }>
+}
