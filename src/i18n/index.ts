@@ -3586,7 +3586,6 @@ const messages = {
           custom: '自定义',
           from: '开始时间',
           to: '结束时间',
-          timezone: '时区',
         },
         actions: {
           refresh: '刷新',
@@ -7632,7 +7631,6 @@ const messages = {
           custom: '自訂',
           from: '開始時間',
           to: '結束時間',
-          timezone: '時區',
         },
         actions: {
           refresh: '刷新',
@@ -11678,7 +11676,6 @@ const messages = {
           custom: 'Custom',
           from: 'From',
           to: 'To',
-          timezone: 'Timezone',
         },
         actions: {
           refresh: 'Refresh',
