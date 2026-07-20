@@ -143,6 +143,10 @@ const resolveChannelTypeDisplay = (channel: AdminPaymentChannel) => {
     return tradeType || channelTypeLabel(channel.channel_type)
   }
   if (channel.provider_type === 'dujiaopay') {
+    const orderMode = String(channel.config_json?.order_mode || '').trim()
+    if (orderMode === 'cashier' || channel.channel_type === 'dujiaopay') {
+      return t('admin.paymentChannels.channelTypes.dujiaopayCashier')
+    }
     const tokenID = String(channel.config_json?.token_id || channel.channel_type || '').trim()
     return channelTypeLabel(tokenID)
   }
